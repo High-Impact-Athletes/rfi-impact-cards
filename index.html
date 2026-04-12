@@ -142,7 +142,7 @@
   .portfolio-note { font-size: 11px; color: rgba(255,255,255,0.25); text-align: center; margin-top: 14px; line-height: 1.5; }
 
   /* ---- SCREEN 3 ---- */
-  .s3-content { display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1; width: 100%; max-width: 380px; }
+  .s3-content { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 1; width: 100%; max-width: 380px; }
   .evidence-box { background: var(--rfi-dark-surface); border: 1px solid rgba(151,206,255,0.15); border-radius: 12px; padding: 18px 20px; width: 100%; text-align: left; }
   .evidence-box h3 { font-family: 'Chakra Petch', sans-serif; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; color: var(--rfi-pastel-blue); }
   .evidence-box p { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.55); }
@@ -162,7 +162,7 @@
   /* ---- VIDEO PLACEHOLDER ---- */
   .video-container {
     width: 100%; max-width: 380px; aspect-ratio: 9/16;
-    max-height: 50vh;
+    max-height: 70vh;
     background: var(--rfi-dark-surface);
     border: 1px solid rgba(151,206,255,0.15);
     border-radius: 16px;
@@ -344,7 +344,7 @@
 <div class="splash" id="splash">
   <div class="splash-glow"></div>
   <div class="splash-badge">
-    <div class="splash-badge-inner">🎯</div>
+    <div class="splash-badge-inner"><img src="assets/milestone-first-donation.png" alt="First Donation" style="width: 72px; height: 72px;"></div>
   </div>
   <div class="splash-text">1st Donation</div>
   <div class="splash-sub">Tap to reveal</div>
@@ -424,7 +424,7 @@
           costPerUnit: 155.41,     // $230 / 1.48
           unit: 'infants vaccinated',
           unitSingular: 'infant vaccinated',
-          desc: 'Vaccinated against preventable diseases through conditional cash transfers in northern Nigeria.',
+          desc: 'Vaccinated against preventable diseases through conditional cash transfers.',
           source: 'https://www.givewell.org/charities/new-incentives',
           sourceLabel: 'GiveWell: Why we recommend New Incentives',
         },
@@ -661,7 +661,7 @@
       <div class="glow glow-bl"></div>
       <div class="s1-content">
         <div class="badge-mini" id="badgeMini">
-          <div class="badge-mini-circle">🎯</div>
+          <div class="badge-mini-circle"><img src="assets/milestone-first-donation.png" alt="" style="width: 20px; height: 20px;"></div>
           <div class="badge-mini-label">1st Donation</div>
         </div>
         <div class="tag fade-up">Race for Impact</div>
@@ -710,9 +710,8 @@
       <div class="glow glow-tr"></div>
       <div class="glow glow-bl"></div>
       <div class="s3-content">
-        <div class="tag fade-up">Why ${cause.name}?</div>
-        <div class="headline fade-up" style="font-size: clamp(22px, 5vw, 32px);">We don't guess.<br><span class="accent">We measure.</span></div>
-        <div class="separator fade-up"></div>
+        <div class="tag fade-up" style="margin-bottom: 12px;">Why ${cause.name}?</div>
+        <div class="headline fade-up" style="font-size: clamp(22px, 5vw, 32px); margin-bottom: 12px;">We don't guess.<br><span class="accent">We measure.</span></div>
 
         <div class="video-container fade-up" id="videoContainer">
           ${cause.expert.videoUrl
