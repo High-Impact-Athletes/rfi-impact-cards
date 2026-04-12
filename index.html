@@ -142,7 +142,7 @@
   .portfolio-note { font-size: 11px; color: rgba(255,255,255,0.25); text-align: center; margin-top: 14px; line-height: 1.5; }
 
   /* ---- SCREEN 3 ---- */
-  .s3-content { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 1; width: 100%; max-width: 380px; }
+  .s3-content { display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 1; width: 100%; max-width: 380px; }
   .evidence-box { background: var(--rfi-dark-surface); border: 1px solid rgba(151,206,255,0.15); border-radius: 12px; padding: 18px 20px; width: 100%; text-align: left; }
   .evidence-box h3 { font-family: 'Chakra Petch', sans-serif; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; color: var(--rfi-pastel-blue); }
   .evidence-box p { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.55); }
@@ -248,7 +248,7 @@
   .splash-badge {
     width: 140px; height: 140px;
     border-radius: 50%;
-    border: 3px solid var(--rfi-pastel-blue);
+    border: 3px solid var(--rfi-white);
     display: flex; align-items: center; justify-content: center;
     position: relative;
     animation: badgeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -311,14 +311,14 @@
   .badge-mini.visible { opacity: 1; transform: translateY(0); }
   .badge-mini-circle {
     width: 36px; height: 36px; border-radius: 50%;
-    border: 2px solid var(--rfi-pastel-blue);
+    border: 2px solid var(--rfi-white);
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
   }
   .badge-mini-label {
     font-family: 'Chakra Petch', sans-serif;
     font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 3px; color: var(--rfi-pastel-blue);
+    letter-spacing: 3px; color: var(--rfi-white);
   }
 
   /* Entrance animations */
@@ -390,7 +390,7 @@
     global_health: {
       name: 'Global Health',
       icon: '🦟',
-      expert: { name: 'Jack', role: 'Cause Area Lead', videoUrl: '' },
+      expert: { name: 'Jack', role: 'Cause Area Lead', videoUrl: 'assets/global-health-video.mp4' },
       charities: [
         {
           name: 'Against Malaria Foundation',
@@ -706,23 +706,23 @@
       </div>
     </div>
 
-    <div class="screen" data-screen="2">
+    <div class="screen" data-screen="2" style="padding-top: 24px; padding-bottom: 64px;">
       <div class="glow glow-tr"></div>
       <div class="glow glow-bl"></div>
       <div class="s3-content">
-        <div class="tag fade-up" style="margin-bottom: 12px;">Why ${cause.name}?</div>
-        <div class="headline fade-up" style="font-size: clamp(22px, 5vw, 32px); margin-bottom: 12px;">We don't guess.<br><span class="accent">We measure.</span></div>
+        <div class="tag fade-up" style="margin-bottom: 8px;">Why ${cause.name}?</div>
+        <div class="headline fade-up" style="font-size: clamp(22px, 5vw, 32px); margin-bottom: 8px;">We don't guess.<br><span class="accent">We measure.</span></div>
 
         <div class="video-container fade-up" id="videoContainer">
           ${cause.expert.videoUrl
-            ? '<video src="' + cause.expert.videoUrl + '" controls playsinline preload="metadata"></video>'
+            ? '<video src="' + cause.expert.videoUrl + '" poster="assets/global-health-poster.jpg" controls playsinline preload="metadata"></video>'
             : '<div class="video-placeholder"><div class="video-play-icon">&#9654;</div><div class="video-label">Video coming soon</div></div>'
           }
         </div>
         <div class="expert-name fade-up">${cause.expert.name}</div>
         <div class="expert-role fade-up">${cause.expert.role} &middot; ${cause.name}</div>
 
-        <a href="https://raceforimpact.com/impact" class="cta-button fade-up" style="margin-top: 16px;">See how we measure &rarr;</a>
+        <a href="https://raceforimpact.com/impact" class="cta-button fade-up" style="margin-top: 8px;">See how we measure &rarr;</a>
         <div class="branding fade-up">Race for Impact &middot; HIA &times; HYROX</div>
       </div>
     </div>
@@ -881,11 +881,10 @@
     activeCard = i;
   }
 
-  function startAuto() { clearInterval(autoTimer); autoTimer = setInterval(() => setCard((activeCard + 1) % CC), 3500); }
-  startAuto();
+  function startAuto() { /* disabled - user controls only */ }
 
-  cardNext.addEventListener('click', (e) => { e.stopPropagation(); setCard((activeCard + 1) % CC); startAuto(); });
-  cardPrev.addEventListener('click', (e) => { e.stopPropagation(); setCard((activeCard - 1 + CC) % CC); startAuto(); });
+  cardNext.addEventListener('click', (e) => { e.stopPropagation(); setCard((activeCard + 1) % CC); });
+  cardPrev.addEventListener('click', (e) => { e.stopPropagation(); setCard((activeCard - 1 + CC) % CC); });
   cardDots.forEach(d => d.addEventListener('click', (e) => { e.stopPropagation(); setCard(parseInt(d.dataset.cd)); startAuto(); }));
 
   // Vertical swipe on cards
