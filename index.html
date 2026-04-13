@@ -368,9 +368,11 @@
 (function() {
 
   // ============================================================
-  // CONFIG: Change these values and everything updates
+  // CONFIG: hardcoded fallback used when no /:slug data is injected
+  // (the Cloudflare Pages Function injects a <script id="rfi-data"> tag
+  // ahead of </head> with the real donation pulled from the Raisely API)
   // ============================================================
-  const DONATION = {
+  const DEFAULT_DONATION = {
     amount: 50,
     currency: '$',
     donorName: 'Sarah Mitchell',
@@ -378,8 +380,16 @@
     isSelfDonation: false,
     racerName: 'Hugo Inglis',
     event: 'HYROX NYC 2026',
-    causeArea: 'global_health',   // global_health | mental_health | womens_empowerment | animal_welfare | climate
+    causeArea: 'global-health',   // global-health | mental-health | womens-empowerment | animal-welfare | climate-change  (matches Raisely profile.public.causeArea)
   };
+
+  const HYDRATED = (() => {
+    const el = document.getElementById('rfi-data');
+    if (!el) return null;
+    try { return JSON.parse(el.textContent); } catch (e) { return null; }
+  })();
+
+  const DONATION = (HYDRATED && HYDRATED.donation) ? HYDRATED.donation : DEFAULT_DONATION;
 
   const HAIRCUT = 0.40;
 
@@ -387,7 +397,7 @@
   // These are the "whole donation to this org" ratios from the master sheet
   // Derived from: $230 donation / impact count (without haircut column)
   const CAUSE_DATA = {
-    global_health: {
+    'global-health': {
       name: 'Global Health',
       icon: '🦟',
       expert: { name: 'Jack Lewars', role: 'Cause Area Lead', videoUrl: 'assets/global-health-video.mp4' },
@@ -439,7 +449,7 @@
         },
       ],
     },
-    mental_health: {
+    'mental-health': {
       name: 'Mental Health',
       icon: '💜',
       expert: { name: 'Jack', role: 'Cause Area Lead', videoUrl: '' },
@@ -473,7 +483,7 @@
         },
       ],
     },
-    womens_empowerment: {
+    'womens-empowerment': {
       name: "Women's Empowerment",
       icon: '👩',
       expert: { name: 'Jack', role: 'Cause Area Lead', videoUrl: '' },
@@ -507,7 +517,7 @@
         },
       ],
     },
-    animal_welfare: {
+    'animal-welfare': {
       name: 'Animal Welfare',
       icon: '🐾',
       expert: { name: 'Jack', role: 'Cause Area Lead', videoUrl: '' },
@@ -550,7 +560,7 @@
         },
       ],
     },
-    climate: {
+    'climate-change': {
       name: 'Climate Solutions',
       icon: '🌍',
       expert: { name: 'Jack', role: 'Cause Area Lead', videoUrl: '' },
