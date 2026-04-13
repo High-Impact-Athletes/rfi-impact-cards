@@ -17,7 +17,7 @@ rfi-impact-cards/
 │   ├── milestone-first-donation.png
 │   └── global-health-poster.jpg
 ├── functions/
-│   └── [slug].js           # Cloudflare Pages Function — Raisely API connector
+│   └── [[path]].js         # Catch-all Pages Function — milestone router + Raisely API connector
 ├── _headers                # Cache headers for /assets/*
 ├── _routes.json            # Tells Pages which paths hit the function
 └── docs/
@@ -43,14 +43,39 @@ files. Everything else is sent to the Pages Function.
 | URL                              | Handler                          | Behavior                                                                |
 |----------------------------------|----------------------------------|-------------------------------------------------------------------------|
 | `/`                              | static `index.html`              | Renders the hardcoded demo donation (`Sarah Mitchell → $50 → Hugo`).    |
-| `/:slug`                         | `functions/[slug].js`            | Fetches Raisely profile + donations, injects JSON, serves `index.html`. |
-| `/:slug?d=latest` (default)      | `functions/[slug].js`            | Most recent successful donation on that profile.                        |
-| `/:slug?d=first`                 | `functions/[slug].js`            | Very first donation on the profile.                                     |
-| `/:slug?d=N`                     | `functions/[slug].js`            | Nth donation, 1-indexed (1 = newest).                                   |
+| `/:slug`                         | `functions/[[path]].js`          | Default milestone (`latest`). Fetches Raisely, injects JSON.            |
+| `/:milestone/:slug`              | `functions/[[path]].js`          | Named milestone view of that profile (see Milestones section).          |
 | `/assets/*`                      | static                           | Long-cache (`max-age=31536000, immutable`).                             |
+| `*.png`, `*.css`, etc.           | static                           | Anything with a `.` falls through to static.                            |
 
-The function falls through (`context.next()`) for any slug containing a `.`,
+The function falls through (`context.next()`) for any segment containing a `.`,
 so `/foo.png` etc. still hit static.
+
+### Milestones
+
+URL shape: `/{milestone}/{slug}` — milestone is the *view*, slug is the *subject*.
+Bare `/{slug}` defaults to `latest`. Live registry in `functions/[[path]].js`.
+
+| Milestone           | Status         | What it picks                                              |
+|---------------------|----------------|------------------------------------------------------------|
+| `latest`            | ✅ live         | Most recent successful donation                            |
+| `first-donation`    | ✅ live         | Oldest donation                                            |
+| `milestone-1`       | ✅ live         | Donation that pushed running total over 25% of goal        |
+| `milestone-2`       | ✅ live         | …over 50% of goal                                          |
+| `milestone-3`       | ✅ live         | …over 75% of goal                                          |
+| `goal-hit`          | ✅ live         | …over 100% of goal                                         |
+| `100-donors`        | 🚧 stub        | Returns `milestone_not_implemented`, falls back to demo    |
+| `halfway`           | 🚧 stub        | (alias for `milestone-2` — to be defined)                  |
+| `final-push`        | 🚧 stub        | TBD — last 7 days, X to go                                 |
+| `daily-summary`     | 🚧 stub        | Aggregate of today's donations (synthetic donation object) |
+| `weekly-summary`    | 🚧 stub        | Aggregate of this week's donations                         |
+
+To add a new milestone: add an entry to the `MILESTONES` map in
+`functions/[[path]].js`. Each entry has either a `pick(donations, profile)`
+returning a single Raisely donation, or an `aggregate(donations, profile)`
+returning a synthetic donation-shaped object. Return `null` if data isn't
+available — the handler falls back to the demo cleanly with an `X-RFI-Error`
+header explaining why.
 
 ## Data flow
 
@@ -127,11 +152,13 @@ There's no dev server in the repo. Two options:
 
 - `curl -I https://rfi-impact-cards.pages.dev/` → 200, demo renders in browser.
 - `curl -sI https://rfi-impact-cards.pages.dev/hugo-inglis-1 | grep -i x-rfi`
-  → returns `X-RFI-Slug: hugo-inglis-1` and `X-RFI-Fallback: 0`.
+  → `X-RFI-Slug: hugo-inglis-1`, `X-RFI-Milestone: latest`, `X-RFI-Fallback: 0`.
 - `curl -s https://rfi-impact-cards.pages.dev/hugo-inglis-1 | grep rfi-data`
   → injected JSON visible in source.
 - Browser `/hugo-inglis-1` → cards render real donor + amount + cause area.
-- `/hugo-inglis-1?d=first` → renders the first donation instead of the latest.
+- `/first-donation/hugo-inglis-1` → renders the very first donation instead.
+- `/milestone-2/hugo-inglis-1` → renders the donation that crossed 50% of goal.
+- `/100-donors/hugo-inglis-1` → falls back to demo, header `X-RFI-Error: milestone_not_implemented`.
 - `/nonexistent-slug-xyz` → falls back to demo, `X-RFI-Fallback: 1`, no 500.
 - `curl -I .../assets/milestone-first-donation.png` → 200 with long-cache.
 
@@ -141,7 +168,8 @@ There's no dev server in the repo. Two options:
 - [x] Cards screen 0/1/2 (splash, swipeable charity cards, video screen) — built by Hugo
 - [x] Hardcoded demo at `/` for design review
 - [x] Cloudflare Pages project connected to Git, auto-deploying `main`
-- [x] Pages Function (`functions/[slug].js`) wires `/:slug` → Raisely public API
+- [x] Catch-all Pages Function (`functions/[[path]].js`) — milestone router + Raisely API
+- [x] Milestones live: `latest`, `first-donation`, `milestone-1/2/3`, `goal-hit`
 - [x] Hydration in `index.html` with safe fallback to demo
 - [x] Cause-area enum unified to kebab-case (matches Raisely + ferrari)
 - [x] `_headers` long-cache for `/assets/*`
