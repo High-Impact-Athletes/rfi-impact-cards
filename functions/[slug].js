@@ -69,13 +69,15 @@ function buildDonation(profile, donation) {
   const causeRaw = profile?.public?.causeArea || '';
   const causeArea = KNOWN_CAUSE_AREAS.has(causeRaw) ? causeRaw : DEFAULT_CAUSE_AREA;
   const currencyCode = (donation.currency || profile?.currency || 'USD').toUpperCase();
+  const donorUserUuid = donation.user?.uuid || donation.userUuid;
+  const profileUserUuid = profile?.user?.uuid || profile?.userUuid;
 
   return {
     amount: Math.round((donation.amount || 0) / 100),
-    currency: CURRENCY_SYMBOLS[currencyCode] || currencyCode,
+    currency: donation.currencySymbol || CURRENCY_SYMBOLS[currencyCode] || currencyCode,
     donorName: buildDonorName(donation),
     donorMessage: (donation.message || '').trim(),
-    isSelfDonation: !!(donation.userUuid && profile?.userUuid && donation.userUuid === profile.userUuid),
+    isSelfDonation: !!(donorUserUuid && profileUserUuid && donorUserUuid === profileUserUuid),
     racerName: buildRacerName(profile),
     event: profile?.campaign?.name || profile?.public?.event || '',
     causeArea,
@@ -103,16 +105,22 @@ export async function onRequest(context) {
   let payload = { fallback: true, slug, error: null, donation: null };
 
   try {
-    const profileUrl = `${RAISELY_API}/profiles/${encodeURIComponent(slug)}`;
-    const donationsUrl = `${RAISELY_API}/profiles/${encodeURIComponent(slug)}/donations?limit=50&sort=createdAt&order=desc&status=OK`;
-
-    const [profileResp, donationsResp] = await Promise.all([
-      fetchJson(profileUrl),
-      fetchJson(donationsUrl),
-    ]);
-
+    // Step 1: profile by path (UUID or slug both work for this endpoint).
+    const profileResp = await fetchJson(
+      `${RAISELY_API}/profiles/${encodeURIComponent(slug)}`
+    );
     const profile = profileResp?.data;
-    const donations = donationsResp?.data || [];
+    if (!profile?.uuid) throw new Error('profile_not_found');
+
+    // Step 2: donations endpoint requires the profile UUID (rejects path slugs).
+    const donationsResp = await fetchJson(
+      `${RAISELY_API}/profiles/${profile.uuid}/donations?limit=50&sort=createdAt&order=desc`
+    );
+    const allDonations = donationsResp?.data || [];
+
+    // Filter to successful donations only. Raisely uses "OK" for paid/cleared.
+    const donations = allDonations.filter(d => !d.status || d.status === 'OK');
+
     const donation = pickDonation(donations, dParam);
     const built = buildDonation(profile, donation);
 
